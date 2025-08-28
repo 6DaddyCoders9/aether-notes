@@ -220,3 +220,6 @@ pids
 build
 dist
 .DS_Store
+
+# Docker volumes
+postgres_data/
