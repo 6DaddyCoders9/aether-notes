@@ -15,4 +15,11 @@ class User(UserBase):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+        
+# Properties to return when an OTP is requested
+class UserOTP(UserBase):
+    otp: str | None = None
+    
+    class Config:
+        from_attributes = True
