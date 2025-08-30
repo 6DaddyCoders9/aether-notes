@@ -8,6 +8,9 @@ services:
       - ./backend:/app
     environment:
       - DATABASE_URL=postgresql://user:password@db:5432/aethernotes_db
+      - MAILGUN_API_KEY=${MAILGUN_API_KEY}
+      - MAILGUN_DOMAIN=${MAILGUN_DOMAIN}
+      - MAIL_FROM_EMAIL=${MAIL_FROM_EMAIL}
     depends_on:
       db:
         condition: service_healthy

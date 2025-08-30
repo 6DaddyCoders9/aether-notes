@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-import database, models, schemas, crud
+import database, models, schemas, crud, email_service
 
 # Create all database tables (if they don't exists)
 models.Base.metadata.create_all(bind=database.engine)
@@ -51,8 +51,8 @@ def request_otp(user_data: schemas.UserCreate, db: Session = Depends(get_db)):
     # Set a new OTP for the user
     user_with_otp = crud.set_user_otp(db, user= db_user)
     
-    # In a real app, you would send an email here
-    # For now, we'll return the OTP for testing purposes
-    print(f"OTP for {user_with_otp.email} is {user_with_otp.otp}") # This will print in your terminal
+    # Send the OTP via email
+    email_service.send_otp_email(to_email=user_with_otp.email, otp=user_with_otp.otp)
     
-    return user_with_otp
+    # For security, don't return the OTP in the response
+    return {"email": user_with_otp.email, "otp": "Email has been sent"} # Returning a placeholder
