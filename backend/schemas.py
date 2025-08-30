@@ -23,3 +23,12 @@ class UserOTP(UserBase):
     
     class Config:
         from_attributes = True
+        
+# Properties to receive via API for OTP verification
+class UserVerifyOTP(UserBase):
+    otp: str
+
+# Properties to return upon successful login (the session token)
+class Token(BaseModel):
+    access_token: str
+    token_type: str

@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-import database, models, schemas, crud, email_service
+import database, models, schemas, crud, email_service, security
 
 # Create all database tables (if they don't exists)
 models.Base.metadata.create_all(bind=database.engine)
@@ -56,3 +56,22 @@ def request_otp(user_data: schemas.UserCreate, db: Session = Depends(get_db)):
     
     # For security, don't return the OTP in the response
     return {"email": user_with_otp.email, "otp": "Email has been sent"} # Returning a placeholder
+
+# Define verify-otp endpoint in auth route
+@app.post("/auth/verify-otp", response_model= schemas.Token)
+def verify_otp(verification_data: schemas.UserVerifyOTP, db: Session = Depends(get_db)):
+    user = crud.get_user_by_email(db, email=verification_data.email)
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    is_valid = crud.verify_user_otp(db, user=user, otp=verification_data.otp)
+    
+    if not is_valid:
+        raise HTTPException(status_code=400, detail="Invalid or expired OTP")
+    
+    # Create and return the access token
+    access_token = security.create_access_token(
+        data={"sub": user.email}
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
