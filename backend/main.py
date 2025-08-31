@@ -1,21 +1,15 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-import database, models, schemas, crud, email_service, security
+import database, models, schemas, crud, email_service, security, google_auth
 
 # Create all database tables (if they don't exists)
 models.Base.metadata.create_all(bind=database.engine)
 
 # Create an instance of the FastAPI class
 app = FastAPI()
-
-# Dependency to get a database session
-def get_db():
-    db = database.SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# Connect to google router
+app.include_router(google_auth.router)
 
 # Define a route for the root URL ("/")
 @app.get("/")
@@ -24,7 +18,7 @@ def read_root():
 
 # Define a health check route
 @app.get("/api/health")
-def health_check(db: Session = Depends(get_db)):
+def health_check(db: Session = Depends(database.get_db)):
     try:
         # Try to execute a simple query
         db.execute(text('SELECT 1'))
@@ -34,7 +28,7 @@ def health_check(db: Session = Depends(get_db)):
 
 # Define users route    
 @app.post("/users/", response_model= schemas.User)
-def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+def create_user(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -42,7 +36,7 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
 # Define request-otp endpoint in auth route
 @app.post("/auth/request-otp", response_model= schemas.UserOTP)
-def request_otp(user_data: schemas.UserCreate, db: Session = Depends(get_db)):
+def request_otp(user_data: schemas.UserCreate, db: Session = Depends(database.get_db)):
     # Check if user exists, if not, create one
     db_user = crud.get_user_by_email(db, email=user_data.email)
     if not db_user:
@@ -59,7 +53,7 @@ def request_otp(user_data: schemas.UserCreate, db: Session = Depends(get_db)):
 
 # Define verify-otp endpoint in auth route
 @app.post("/auth/verify-otp", response_model= schemas.Token)
-def verify_otp(verification_data: schemas.UserVerifyOTP, db: Session = Depends(get_db)):
+def verify_otp(verification_data: schemas.UserVerifyOTP, db: Session = Depends(database.get_db)):
     user = crud.get_user_by_email(db, email=verification_data.email)
     
     if not user:
