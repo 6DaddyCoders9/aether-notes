@@ -1,4 +1,5 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 import database, models, schemas, crud, email_service, security, google_auth
@@ -8,8 +9,32 @@ models.Base.metadata.create_all(bind=database.engine)
 
 # Create an instance of the FastAPI class
 app = FastAPI()
+
 # Connect to google router
 app.include_router(google_auth.router)
+
+# Create an instance of HTTPBearer class
+oauth2_scheme = HTTPBearer()
+
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(database.get_db)):
+    # Define the exception to be raised if authentication fails
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
+    user_email = security.verify_token(token.credentials)
+    
+    if user_email is None:
+        raise credentials_exception
+    
+    db_user = crud.get_user_by_email(db, email=user_email)
+    
+    if not db_user:
+        raise credentials_exception
+    
+    return db_user
 
 # Define a route for the root URL ("/")
 @app.get("/")
@@ -33,6 +58,11 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(database.get_db)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     return crud.create_user(db=db, user=user) 
+
+# Define user profile route
+@app.get("/users/me", response_model= schemas.User)
+def user_profile(current_user: models.User = Depends(get_current_user)):
+    return current_user
 
 # Define request-otp endpoint in auth route
 @app.post("/auth/request-otp", response_model= schemas.UserOTP)
