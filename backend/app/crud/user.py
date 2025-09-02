@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
-import models, schemas
+from app.db import base as models
+from app.schemas import user as schemas
 import random
 from datetime import datetime, timedelta, timezone
 

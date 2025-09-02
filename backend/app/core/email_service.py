@@ -24,7 +24,6 @@ def send_otp_email(to_email: str, otp: str):
         
         response.raise_for_status() # Raise an exception for bad status codes (4xx or 5xx)
         
-        print(f"Successfully sent OTP email to {to_email}")
         return response
         
     except requests.exceptions.RequestException as e:
