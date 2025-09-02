@@ -14,3 +14,20 @@ def create_access_token(data: dict):
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
+def verify_token(token: str):
+    try: 
+        # Decode the token using your secret key and algorithm
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        
+        # The user's email is stored in the "sub" (subject) claim
+        email: str = payload.get("sub")
+        
+        if email is None:
+            # If the "sub" claim is missing, the token is invalid
+            return None
+            
+        return email
+    
+    except JWTError:
+        return None
