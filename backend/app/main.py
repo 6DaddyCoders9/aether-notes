@@ -1,0 +1,31 @@
+from fastapi import FastAPI, Depends
+from sqlalchemy.orm import Session
+from sqlalchemy import text
+from app.db.session import engine
+from app.db import base as models
+from app.api.v1 import deps
+from app.api.v1.endpoints import auth, google
+
+# This creates all the database tables(if they don't exist)
+models.Base.metadata.create_all(bind=engine)
+
+# Create an instance of the FastAPI class
+app = FastAPI(title="AetherNotes API")
+
+# Define a route for the root URL ("/")
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to AetherNotes API"}
+
+# Define a  simple, top-level health check endpoint
+@app.get("/api/health")
+def health_check(db: Session = Depends(deps.get_db)):
+    try:
+        db.execute(text('SELECT 1'))
+        return {"status": "ok", "database": "connected"}
+    except Exception as e:
+        return {"status": "error", "database": "disconnected", "detail": str(e)}
+
+# API routers
+app.include_router(auth.router, prefix="/api/v1", tags=["Authentication"])
+app.include_router(google.router, prefix="/api/v1", tags=["Google Authentication"])

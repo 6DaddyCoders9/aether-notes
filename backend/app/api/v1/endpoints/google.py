@@ -1,11 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
+from sqlalchemy.orm import Session
 from google_auth_oauthlib.flow import Flow
 from google.oauth2 import id_token
 from google.auth.transport.requests import Request
-from sqlalchemy.orm import Session
-import os
-import database, schemas, crud, security
+import os   
+from app.schemas import user as schemas
+from app.api.v1.deps import get_db
+from app.crud import user as crud
+from app.core import security
 
 # Get Google credentials from environment variables
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
@@ -19,7 +22,7 @@ SCOPES = [
 ]
 
 # The URL our backend will listen on for the callback from Google
-REDIRECT_URI = "http://localhost:8000/auth/google/callback"
+REDIRECT_URI = "http://localhost:8000/api/v1/auth/google/callback"
 
 # Create an instance of the APIRouter class
 router = APIRouter()
@@ -55,7 +58,7 @@ def google_login():
 
 # Define /google/callback endpoint
 @router.get("/auth/google/callback", response_model=schemas.Token)
-def google_callback(code: str, state: str, db: Session = Depends(database.get_db)):
+def google_callback(code: str, state: str, db: Session = Depends(get_db)):
     client_config = {
         "web": {
             "client_id": GOOGLE_CLIENT_ID,
