@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import text
+from fastapi.middleware.cors import CORSMiddleware
 from app.db.session import engine
 from app.db import base as models
 from app.api.v1 import deps
@@ -11,6 +12,22 @@ models.Base.metadata.create_all(bind=engine)
 
 # Create an instance of the FastAPI class
 app = FastAPI(title="AetherNotes API")
+
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    # Add your deployed frontend URL here later
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins, # Allow only the specified origins
+    allow_credentials=True, # Allow cookies and authorization headers
+    allow_methods=["*"], # Allow all HTTP methods (GET, POST, etc.)
+    allow_headers=["*"], # Allow all headers
+)
 
 # Define a route for the root URL ("/")
 @app.get("/")
