@@ -31,5 +31,14 @@ services:
       timeout: 5s
       retries: 5
 
+    # frontend Vite React+TS
+    frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
 volumes:
   postgres_data:
