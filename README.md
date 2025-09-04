@@ -21,30 +21,11 @@ This project uses a modern, industry-standard technology stack designed for scal
 | :--- | :--- |
 | **Frontend** | React, Vite |
 | **Backend** | FastAPI (Python) |
-| **Database** | PostgreSQL |
+| **Database** | Supabase (PostgreSQL) |
 | **Containerization** | Docker |
 | **AI Layer** | LangChain |
 | **Authentication** | JWT, Google OAuth 2.0 |
-| **File Storage** | Cloudflare R2 |
-
-### System Architecture
-
-The application is designed as a decoupled system where the React frontend communicates with the FastAPI backend via a versioned REST API.
-
-```
-[ User Browser ]
-       |
-       v
-[ React Frontend ] --(API Requests)--> [ FastAPI Backend ]
-       |                                       |
-       |                                       +-- (User & Metadata) --> [ PostgreSQL DB ]
-       |                                       |
-       |                                       +-- (File Uploads) ----> [ Cloud Storage (S3/R2) ]
-       |                                       |
-       +--(Google Login)--> [ Google OAuth ] <--+
-```
-
------
+| **File Storage** | Supabase (Storage) |
 
 ## \#\#  Getting Started
 
