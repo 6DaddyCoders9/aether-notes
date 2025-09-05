@@ -1,5 +1,6 @@
 from fastapi import APIRouter, UploadFile, Depends, HTTPException, File, status
 from sqlalchemy.orm import Session
+from typing import List
 from app.schemas import document as doc_schemas
 from app.api.v1 import deps
 from app.db import base as models
@@ -8,6 +9,7 @@ from app.crud import document as doc_crud
 
 router = APIRouter()
 
+# Define upload enpoint in documents route
 @router.post("/documents/upload", response_model=doc_schemas.Document)
 def document_upload(
     db: Session = Depends(deps.get_db), 
@@ -42,3 +44,11 @@ def document_upload(
     )
     
     return db_document
+
+# Define route to List documents
+@router.get("/documents/", response_model=List[doc_schemas.Document])
+def list_documents(
+    db: Session = Depends(deps.get_db),
+    current_user: models.User = Depends(deps.get_current_user)
+):
+    return doc_crud.get_documents_by_user(db, current_user.id)
