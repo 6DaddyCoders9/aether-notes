@@ -52,3 +52,36 @@ def list_documents(
     current_user: models.User = Depends(deps.get_current_user)
 ):
     return doc_crud.get_documents_by_user(db, current_user.id)
+
+# Define delete endpoint in document route
+@router.delete("/documents/{document_id}", response_model=doc_schemas.Document)
+def document_delete(
+    document_id : int,
+    db: Session = Depends(deps.get_db),
+    current_user: models.User = Depends(deps.get_current_user)
+):
+    doc_to_delete = db.query(models.Document).filter(
+        models.Document.id == document_id,
+        models.Document.user_id == current_user.id
+    ).first()
+    
+    if not doc_to_delete:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Document not found"
+        )
+        
+    try:
+        # Delete the file
+        supabase_client.storage.from_("document-uploads").remove(
+            paths=[doc_to_delete.storage_path]
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete file from storage: {e}"
+        )
+    
+    deleted_doc_record = doc_crud.delete_document(db=db, doc=doc_to_delete)
+
+    return deleted_doc_record

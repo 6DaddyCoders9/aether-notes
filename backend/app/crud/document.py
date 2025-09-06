@@ -17,3 +17,9 @@ def create_document(db: Session, document: schemas.DocumentCreate, user_id: int,
 # Check for existing documents for specific user
 def get_documents_by_user(db: Session, user_id: int):
     return db.query(models.Document).filter(models.Document.user_id == user_id).all()
+
+# Delete a document object from the database.
+def delete_document(db: Session, doc: models.Document):
+    db.delete(doc)
+    db.commit()
+    return doc
