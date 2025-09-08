@@ -56,8 +56,7 @@ def google_login():
     # Return a response that redirects the user's browser to Google
     return RedirectResponse(url=authorization_url)
 
-# Define /google/callback endpoint
-@router.get("/auth/google/callback", response_model=schemas.Token)
+@router.get("/auth/google/callback")
 def google_callback(code: str, state: str, db: Session = Depends(get_db)):
     client_config = {
         "web": {
@@ -80,9 +79,10 @@ def google_callback(code: str, state: str, db: Session = Depends(get_db)):
 
     try:
         user_info = id_token.verify_oauth2_token(
-            id_token=user_cred['id_token'], 
-            request=Request(), 
-            audience=GOOGLE_CLIENT_ID
+            id_token=user_cred['id_token'],
+            request=Request(),
+            audience=GOOGLE_CLIENT_ID,
+            clock_skew_in_seconds=10
         )
     except ValueError as e:
         raise HTTPException(
@@ -94,16 +94,18 @@ def google_callback(code: str, state: str, db: Session = Depends(get_db)):
     if not user_email:
         raise HTTPException(status_code=400, detail="Could not retrieve email from Google")
 
-    # Find or create the user
+    # Find an existing user or create a new one in the database
     db_user = crud.get_user_by_email(db, email=user_email)
     if not db_user:
-        user_schema = schemas.UserCreate(email=user_email)
-        db_user = crud.create_user(db=db, user=user_schema)
-        
-    # Create a session token for the user
+        db_user = crud.create_user(db=db, user=schemas.UserCreate(email=user_email))
+
+    # Create a JWT access token for our application
     access_token = security.create_access_token(
         data={"sub": db_user.email}
     )
-    
-    # Return the token
-    return {"access_token": access_token, "token_type": "bearer"}
+
+    # Redirect the user back to the frontend with the token
+    frontend_url = "http://127.0.0.1:5173/dashboard" # The frontend URL
+    redirect_url = f"{frontend_url}?token={access_token}"
+
+    return RedirectResponse(url=redirect_url)
