@@ -1,6 +1,24 @@
 import Button from "../components/Button";
+import { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function DashboardPage() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const token = params.get("token");
+
+    if (token) {
+      // Save token once
+      localStorage.setItem("token", token);
+
+      // Remove token from URL (clean it up)
+      navigate("/dashboard", { replace: true });
+    }
+  }, [location, navigate]);
+
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
