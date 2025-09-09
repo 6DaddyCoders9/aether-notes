@@ -105,7 +105,7 @@ def google_callback(code: str, state: str, db: Session = Depends(get_db)):
     )
 
     # Redirect the user back to the frontend with the token
-    frontend_url = "http://127.0.0.1:5173/dashboard" # The frontend URL
+    frontend_url = os.getenv("FRONTEND_URL")
     redirect_url = f"{frontend_url}?token={access_token}"
 
     return RedirectResponse(url=redirect_url)
