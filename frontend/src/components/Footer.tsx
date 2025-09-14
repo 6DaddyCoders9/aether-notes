@@ -3,12 +3,17 @@ import { MdEmail } from "react-icons/md";
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-50 border-t mt-16">
+    <footer className="bg-gray-50 border-t">
       <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Left: Copyright */}
+        <div className="flex-row items-center gap-5">
         <p className="text-sm text-gray-500">
           © {new Date().getFullYear()} Aether Notes. All rights reserved.
         </p>
+        <a className="text-sm text-gray-500">
+          Privacy Policy
+        </a>
+        </div>
 
         {/* Right: Icons */}
         <div className="flex items-center gap-5 text-gray-600">
