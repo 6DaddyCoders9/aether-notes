@@ -1,6 +1,6 @@
 # === Builder stage: Download the model ===
 # Use a full Python image to handle the download, as 'slim' might lack build tools or full pip functionality
-FROM python:3.11 as builder
+FROM python:3.11 AS builder
 
 # Set the cache directory for Hugging Face models *within this builder stage*
 ENV HF_HOME="/cache/huggingface"
@@ -28,11 +28,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the pre-downloaded model from the builder stage's cache.
 # This copies the entire /cache/huggingface from the builder to /app/.cache/huggingface in the final image.
-COPY --from=builder ${HF_HOME} ${WORKDIR}/.cache/huggingface
+COPY --from=builder /cache/huggingface /app/.cache/huggingface
 
 # Set the HF_HOME environment variable in the final image
 # This tells sentence-transformers (and other Hugging Face libraries) where to find the model at runtime.
-ENV HF_HOME="${WORKDIR}/.cache/huggingface"
+ENV HF_HOME="/app/.cache/huggingface" 
 ENV EMBEDDING_MODEL_NAME="all-MiniLM-L6-v2" 
 
 # Copy the rest of your application code

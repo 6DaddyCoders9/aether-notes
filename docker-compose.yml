@@ -8,11 +8,14 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
+      - ./chroma_db:/app/chroma_db
     environment:
       - DATABASE_URL=postgresql://user:password@db:5432/aethernotes_db
     depends_on:
       db:
         condition: service_healthy
+      ollama:
+        condition: service_started
 
   # PostgreSQL Database Service
   db:
@@ -31,7 +34,7 @@ services:
       timeout: 5s
       retries: 5
 
-    # frontend Vite React+TS
+  # frontend Vite React+TS
   frontend:
     build: ./frontend
     container_name: frontend
@@ -40,5 +43,13 @@ services:
     depends_on:
       - backend
 
+  ollama:
+    image: ollama/ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+
 volumes:
   postgres_data:
+  ollama_models: 

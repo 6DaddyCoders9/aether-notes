@@ -10,8 +10,8 @@ from app.core.supabase_client import supabase_client
 from app.crud import document as doc_crud
 from app.core.document_processor import DocumentProcessor
 
-CHROMA_DB_DIRECTORY = os.getenv("CHROMA_DB_DIRECTORY")
-HUGGING_FACE_EMBEDDING_MODEL = os.getenv("HUGGING_FACE_EMBEDDING_MODEL")
+CHROMA_DB_DIRECTORY = os.getenv("CHROMA_DB_DIRECTORY", "chroma_db")
+HUGGING_FACE_EMBEDDING_MODEL = os.getenv("HUGGING_FACE_EMBEDDING_MODEL","all-MiniLM-L6-v2")
 
 router = APIRouter()
 
