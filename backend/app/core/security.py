@@ -1,4 +1,5 @@
 import secrets
+from core.auth_utils import is_token_blacklisted
 from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
 
@@ -17,16 +18,17 @@ def create_access_token(data: dict):
 
 def verify_token(token: str):
     try: 
-        # Decode the token using your secret key and algorithm
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        
-        # The user's email is stored in the "sub" (subject) claim
         email: str = payload.get("sub")
-        
+        exp: int = payload.get("exp")
+
         if email is None:
-            # If the "sub" claim is missing, the token is invalid
             return None
-            
+
+        # Check if token is blacklisted
+        if is_token_blacklisted(token):
+            return None
+
         return email
     
     except JWTError:
