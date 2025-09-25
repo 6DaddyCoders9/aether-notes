@@ -24,6 +24,11 @@ def verify_token(token: str):
 
         if email is None:
             return None
+        
+        # Check expiration manually just in case
+        now_ts = int(datetime.now(timezone.utc).timestamp())
+        if exp is not None and exp < now_ts:
+            return None
 
         # Check if token is blacklisted
         if is_token_blacklisted(token):
