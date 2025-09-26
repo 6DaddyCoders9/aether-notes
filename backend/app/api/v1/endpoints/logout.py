@@ -2,8 +2,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime, timezone
-from core.security import verify_token
-from core.auth_utils import blacklist_token
+from app.core.security import SECRET_KEY, ALGORITHM, verify_token
+from app.core.auth_utils import blacklist_token
+from jose import jwt
 
 router = APIRouter()
 
@@ -22,22 +23,17 @@ def logout(token: str = Depends(oauth2_scheme)):
             detail="Invalid or expired token"
         )
 
-    # Decode token to get expiration
-    from jose import jwt
-    from core.security import SECRET_KEY, ALGORITHM
-
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        exp: int = payload.get("exp")
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid token")
+        jti = payload.get("jti")
+        exp = payload.get("exp")
+        if not jti or not exp:
+            raise HTTPException(status_code=400, detail="Invalid token payload")
 
-    if exp is None:
-        raise HTTPException(status_code=400, detail="Token missing expiration")
+        expires_at = datetime.fromtimestamp(exp, tz=timezone.utc)
+        blacklist_token(jti, expires_at) 
 
-    expires_at = datetime.fromtimestamp(exp, tz=timezone.utc)
-
-    # Blacklist the token
-    blacklist_token(token, expires_at)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to blacklist token: {e}")
 
     return {"message": "Successfully logged out"}
