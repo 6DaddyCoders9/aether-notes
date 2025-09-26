@@ -223,3 +223,10 @@ dist
 
 # Docker volumes
 postgres_data/
+
+# Ignore ChromaDB directory
+chroma_db/
+
+# Ignore temporary test files
+test_loader.py
+sample.pdf
