@@ -12,22 +12,16 @@ services:
     environment:
       - DATABASE_URL=postgresql://user:password@db:5432/aethernotes_db
     depends_on:
-<<<<<<< HEAD
+      redis:
+        condition: service_healthy
       db:
         condition: service_healthy
-      ollama:
-        condition: service_started
-=======
-      - redis
-      - db:
-          condition: service_healthy
   
   redis:
     image: redis:7-alpine
     restart: unless-stopped
     ports:
       - "6379:6379"
->>>>>>> 22342c7 (setup redis in docker-compose)
 
   # PostgreSQL Database Service
   db:
