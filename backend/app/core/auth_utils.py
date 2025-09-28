@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from core.redis_client import redis_client
+from app.core.redis_client import redis_client
 
 BLACKLIST_PREFIX = "bl:"
 

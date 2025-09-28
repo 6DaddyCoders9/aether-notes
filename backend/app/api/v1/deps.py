@@ -3,7 +3,7 @@ from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
 from app.db import session
 from app.crud import user as crud
-from core import security
+from app.core import security
 
 def get_db():
     db = session.SessionLocal()

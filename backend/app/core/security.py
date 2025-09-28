@@ -3,7 +3,7 @@ import secrets
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 from jose import JWTError, jwt
-from core.auth_utils import is_token_blacklisted
+from app.core.auth_utils import is_token_blacklisted
 
 # Use env var for SECRET_KEY in production
 SECRET_KEY = os.getenv("SECRET_KEY") or secrets.token_urlsafe(32)

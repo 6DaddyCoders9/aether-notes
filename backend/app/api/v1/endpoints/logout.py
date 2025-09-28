@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer
 from datetime import datetime, timezone
-from core.security import verify_token
-from core.auth_utils import blacklist_token
+from app.core.security import verify_token
+from app.core.auth_utils import blacklist_token
 
 router = APIRouter()
 oauth2_scheme = HTTPBearer()
