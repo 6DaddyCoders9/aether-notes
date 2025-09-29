@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.db.session import engine
 from app.db import base as models
 from app.api.v1 import deps
-from app.api.v1.endpoints import auth, google, documents, chats
+from app.api.v1.endpoints import auth, google, documents, logout
 
 # This creates all the database tables(if they don't exist)
 models.Base.metadata.create_all(bind=engine)
@@ -47,4 +47,4 @@ def health_check(db: Session = Depends(deps.get_db)):
 app.include_router(auth.router, prefix="/api/v1", tags=["Authentication"])
 app.include_router(google.router, prefix="/api/v1", tags=["Google Authentication"])
 app.include_router(documents.router, prefix="/api/v1", tags=["Document Upload"])
-app.include_router(chats.router, prefix="/api/v1", tags=["Chats"])
+app.include_router(logout.router, prefix="/api/v1", tags=["Logout"])
